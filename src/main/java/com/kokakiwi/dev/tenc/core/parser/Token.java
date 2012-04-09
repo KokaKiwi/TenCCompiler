@@ -37,6 +37,8 @@ public class Token
     public final static int EQUAL              = 104;
     public final static int AND                = 105;
     public final static int OR                 = 106;
+    public final static int NOTEQUAL           = 107;
+    public final static int ANTI               = 108;
     
     /* Misc */
     public final static int DATA_TYPE_NAME     = 130;
@@ -52,6 +54,7 @@ public class Token
     public final static int DATA_INTEGER       = 171;
     public final static int DATA_HEX           = 172;
     public final static int DATA_STRING        = 173;
+    public final static int DATA_BOOLEAN       = 174;
     
     /* Main */
     private final String    matched;

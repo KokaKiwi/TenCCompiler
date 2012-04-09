@@ -16,7 +16,12 @@ public class Number extends Factor
     
     public Number(int number)
     {
-        super(TYPE);
+        this(TYPE, number);
+    }
+    
+    public Number(String type, int number)
+    {
+        super(type);
         this.number = number;
     }
     
@@ -89,6 +94,10 @@ public class Number extends Factor
             final Number number2 = new Number(number);
             node.addChild(number2);
             
+            result = true;
+        }
+        else if (Boolean.accept(node, reader))
+        {
             result = true;
         }
         

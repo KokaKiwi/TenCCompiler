@@ -53,18 +53,15 @@ public class Condition extends AbstractSyntaxNode
                     
                     if (first)
                     {
-                        ConditionFactor a = (ConditionFactor) children
-                                .get(i - 1);
-                        ConditionFactor b = (ConditionFactor) children
-                                .get(i + 1);
+                        AbstractSyntaxNode a = children.get(i - 1);
+                        AbstractSyntaxNode b = children.get(i + 1);
                         lines.addAll(a.generate(context));
                         lines.addAll(b.generate(context));
                         first = false;
                     }
                     else
                     {
-                        ConditionFactor factor = (ConditionFactor) children
-                                .get(i + 1);
+                        AbstractSyntaxNode factor = children.get(i + 1);
                         lines.addAll(factor.generate(context));
                         lines.add("SET PC, " + falseLabel);
                     }

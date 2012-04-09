@@ -54,6 +54,7 @@ FalseTrigraph                    = (("?"(("?")*)[^\=\(\)\/\'\<\>\!\-\\\?\"\n])|(
 StringLiteral                    = ([\"]((((("?")*)({Escape}|{OctEscape}|{HexEscape}|{Trigraph}))|{FalseTrigraph}|{AnyStrChr})*)(("?")*)[\"])
 UnclosedStringLiteral            = ([\"]([\\].|[^\\\"])*[^\"]?)
 ErrorStringLiteral               = ({UnclosedStringLiteral}[\"])
+Boolean                          = ("true"|"false")
 
 NonFloatSuffix                   = (([uU][lL]?)|([lL][uU]?))
 IntegerLiteral                   = ({Digit}+{Exponent}?{NonFloatSuffix}?)
@@ -66,7 +67,7 @@ Identifier                       = ({LetterOrUnderscore}({LetterOrUnderscore}|{D
 ErrorIdentifier                  = ({NonSeparator}+)
 PointerIdentifier                = ({Identifier}\*)
 
-DataType                         = ("int"|"char"|"void")
+DataType                         = ("int"|"char"|"boolean"|"void")
 
 MLCBegin                         = "/*"
 MLCEnd                           = "*/"
@@ -79,11 +80,6 @@ LineCommentBegin                 = "//"
 %%
 
 <YYINITIAL> {
-    /* Blocks */
-    "if"                            { addToken(Token.IF); }
-    "while"                         { addToken(Token.WHILE); }
-    "return"                        { addToken(Token.RETURN); }
-    "null"                          { addToken(Token.NULL); }
     
     "{"                             { addToken(Token.OPEN_BRACK); }
     "}"                             { addToken(Token.CLOSE_BRACK); }
@@ -111,11 +107,8 @@ LineCommentBegin                 = "//"
     "=="                            { addToken(Token.EQUAL); }
     "&&"                            { addToken(Token.AND); }
     "||"                            { addToken(Token.OR); }
-
-    {LineTerminator}                {  }
-    {Identifier}                    { addToken(Token.IDENTIFIER); }
-    {PointerIdentifier}             { addToken(Token.POINTER_IDENTIFIER); }
-    {WhiteSpace}+                   {  }
+    "!="                            { addToken(Token.NOTEQUAL); }
+    "!"                             { addToken(Token.ANTI); }
 
     /* String/Character Literals. */
     {CharLiteral}                   { addToken(Token.DATA_CHAR); }
@@ -131,6 +124,18 @@ LineCommentBegin                 = "//"
     {HexLiteral}                    { addToken(Token.DATA_HEX); }
     {FloatLiteral}                  {  }
     {ErrorNumberFormat}             {  }
+    {Boolean}                       { addToken(Token.DATA_BOOLEAN); }
+    
+    /* Blocks */
+    "if"                            { addToken(Token.IF); }
+    "while"                         { addToken(Token.WHILE); }
+    "return"                        { addToken(Token.RETURN); }
+    "null"                          { addToken(Token.NULL); }
+
+    {LineTerminator}                {  }
+    {Identifier}                    { addToken(Token.IDENTIFIER); }
+    {PointerIdentifier}             { addToken(Token.POINTER_IDENTIFIER); }
+    {WhiteSpace}+                   {  }
     
     
     "\\"                            {  }

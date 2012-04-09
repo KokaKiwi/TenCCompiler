@@ -26,7 +26,7 @@ public class ConditionTerm extends AbstractSyntaxNode
         {
             context.setValue("condFactorInstruction",
                     context.getValue("condTermInstruction"));
-            ConditionFactor factor = (ConditionFactor) children.get(0);
+            AbstractSyntaxNode factor = children.get(0);
             lines.addAll(factor.generate(context));
         }
         else
@@ -53,10 +53,8 @@ public class ConditionTerm extends AbstractSyntaxNode
                     {
                         String aTrueLabel = context.getUniqueId("a-true");
                         String bTrueLabel = context.getUniqueId("b-true");
-                        ConditionFactor a = (ConditionFactor) children
-                                .get(i - 1);
-                        ConditionFactor b = (ConditionFactor) children
-                                .get(i + 1);
+                        AbstractSyntaxNode a = children.get(i - 1);
+                        AbstractSyntaxNode b = children.get(i + 1);
                         
                         context.setValue("condFactorInstruction", "SET PC, "
                                 + aTrueLabel);
@@ -73,8 +71,7 @@ public class ConditionTerm extends AbstractSyntaxNode
                     else
                     {
                         String cTrueLabel = context.getUniqueId("c-true");
-                        ConditionFactor c = (ConditionFactor) children
-                                .get(i + 1);
+                        AbstractSyntaxNode c = children.get(i + 1);
                         
                         context.setValue("condFactorInstruction", "SET PC, "
                                 + cTrueLabel);
@@ -82,6 +79,8 @@ public class ConditionTerm extends AbstractSyntaxNode
                         lines.add("SET PC, " + falseLabel);
                         lines.add(":" + cTrueLabel);
                     }
+                    lines.add(context.getValue("condTermInstruction"));
+                    lines.add(":" + falseLabel);
                 }
             }
         }

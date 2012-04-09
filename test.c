@@ -1,15 +1,10 @@
 void main()
 {
-    int pointer = 0x8000;
-    char c = 'A';
-    int counter = 0;
+    boolean bool = false;
+    int i = 365;
     
-    while(counter < 26)
+    if(!bool && i == 365)
     {
-        [pointer] = c;
-        
-        c = c + 1;
-        pointer = pointer + 1;
-        counter = counter + 1;
+        [0x8000] = 'Y';
     }
 }
