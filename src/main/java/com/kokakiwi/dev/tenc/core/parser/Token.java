@@ -29,16 +29,23 @@ public class Token
     public final static int DIVIDE             = 93;
     public final static int MOD                = 94;
     public final static int ASSIGN             = 95;
+    public final static int PLUSASSIGN         = 96;
+    public final static int MINUSASSIGN        = 97;
+    public final static int TIMESASSIGN        = 98;
+    public final static int DIVIDEASSIGN       = 99;
+    public final static int MODASSIGN          = 100;
+    public final static int PLUSPLUS           = 101;
+    public final static int MINUSMINUS         = 102;
     
-    public final static int GREATER            = 100;
-    public final static int LESSTHAN           = 101;
-    public final static int GREATEREQ          = 102;
-    public final static int LESSEQ             = 103;
-    public final static int EQUAL              = 104;
-    public final static int AND                = 105;
-    public final static int OR                 = 106;
-    public final static int NOTEQUAL           = 107;
-    public final static int ANTI               = 108;
+    public final static int GREATER            = 110;
+    public final static int LESSTHAN           = 111;
+    public final static int GREATEREQ          = 112;
+    public final static int LESSEQ             = 113;
+    public final static int EQUAL              = 114;
+    public final static int AND                = 115;
+    public final static int OR                 = 116;
+    public final static int NOTEQUAL           = 117;
+    public final static int ANTI               = 118;
     
     /* Misc */
     public final static int DATA_TYPE_NAME     = 130;

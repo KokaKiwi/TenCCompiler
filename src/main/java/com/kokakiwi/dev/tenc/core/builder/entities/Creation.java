@@ -15,7 +15,7 @@ public class Creation extends Assignment
     
     public Creation(Function.Type dataType)
     {
-        super(TYPE, dataType.getName());
+        super(TYPE, dataType.getName(), Token.ASSIGN);
         this.dataType = dataType;
     }
     

@@ -2,6 +2,7 @@ package com.kokakiwi.dev.tenc.core.builder;
 
 import java.util.List;
 
+import com.kokakiwi.dev.tenc.core.Compiler;
 import com.kokakiwi.dev.tenc.core.parser.Token;
 
 public class TokenReader
@@ -33,10 +34,19 @@ public class TokenReader
     {
         if (lookahead(lookahead).code() == token.code())
         {
-            position++;
-            return true;
+            if (Compiler.debug)
+            {
+                System.out.println("Accepted token: " + lookahead(lookahead));
+            }
+            return accept();
         }
         return false;
+    }
+    
+    public boolean accept()
+    {
+        position++;
+        return true;
     }
     
     public void expect(int code, String expected)

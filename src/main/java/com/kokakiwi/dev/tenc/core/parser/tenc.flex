@@ -100,6 +100,15 @@ LineCommentBegin                 = "//"
     "/"                             { addToken(Token.DIVIDE); }
     "%"                             { addToken(Token.MOD); }
     "="                             { addToken(Token.ASSIGN); }
+    "+="                            { addToken(Token.PLUSASSIGN); }
+    "-="                            { addToken(Token.MINUSASSIGN); }
+    "*="                            { addToken(Token.TIMESASSIGN); }
+    "/="                            { addToken(Token.DIVIDEASSIGN); }
+    "%="                            { addToken(Token.MODASSIGN); }
+    "++"                            { addToken(Token.PLUSPLUS); }
+    "--"                            { addToken(Token.MINUSMINUS); }
+    
+    /* Comparators */
     ">"                             { addToken(Token.GREATER); }
     "<"                             { addToken(Token.LESSTHAN); }
     ">="                            { addToken(Token.GREATEREQ); }

@@ -49,7 +49,10 @@ public class Identifier extends Factor
         
         int offset = context.getOffset(name);
         lines.add("SET I, SP");
-        lines.add("ADD I, " + offset);
+        if (offset != 0)
+        {
+            lines.add("ADD I, " + offset);
+        }
         lines.add("SET " + regToUse + ", [I]");
         
         return lines;

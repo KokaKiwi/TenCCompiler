@@ -8,14 +8,14 @@ import com.kokakiwi.dev.tenc.core.builder.TokenReader;
 import com.kokakiwi.dev.tenc.core.generator.Context;
 import com.kokakiwi.dev.tenc.core.parser.Token;
 
-public class MemSet extends AbstractSyntaxNode
+public class MemSet extends Assignment
 {
     public final static String TYPE     = "MemSet";
     public final static String regToUse = "X";
     
     public MemSet()
     {
-        super(TYPE);
+        super(TYPE, null);
     }
     
     @Override
@@ -23,20 +23,34 @@ public class MemSet extends AbstractSyntaxNode
     {
         List<String> lines = Lists.newLinkedList();
         
+        String value = getValue(context, lines);
+        
         Expression address = (Expression) children.get(0);
-        Expression value = (Expression) children.get(1);
-
-        lines.add(";Setting RAM");
-        lines.add(";Calc value");
-        context.setValue("__result", regToUse);
-        lines.addAll(value.generate(context));
-        lines.add(";Calc address");
         context.setValue("__result", "J");
         lines.addAll(address.generate(context));
-        lines.add(";Setting value");
-        lines.add("SET [J], " + regToUse);
+        
+        generateOperationLines(lines, op, value, "[J]");
         
         return lines;
+    }
+    
+    protected String getValue(Context context, List<String> lines)
+    {
+        if (op == Token.PLUSPLUS || op == Token.MINUSMINUS)
+        {
+            return "1";
+        }
+        else
+        {
+            Context exprContext = new Context(context);
+            exprContext.setValue("__result", regToUse);
+            
+            Expression value = (Expression) children.get(1);
+            context.setValue("__result", regToUse);
+            lines.addAll(value.generate(context));
+            
+            return regToUse;
+        }
     }
     
     public static boolean accept(AbstractSyntaxNode node, TokenReader reader)
@@ -47,14 +61,37 @@ public class MemSet extends AbstractSyntaxNode
         if (reader.accept(Token.OPEN_SQUARE))
         {
             if (Expression.accept(memSet, reader)
-                    && reader.accept(Token.CLOSE_SQUARE)
-                    && reader.accept(Token.ASSIGN))
+                    && reader.accept(Token.CLOSE_SQUARE))
             {
-                Expression.accept(memSet, reader);
-                
-                node.addChild(memSet);
-                
-                result = true;
+                if (reader.lookahead(0).code() == Token.ASSIGN
+                        || reader.lookahead(0).code() == Token.PLUSASSIGN
+                        || reader.lookahead(0).code() == Token.MINUSASSIGN
+                        || reader.lookahead(0).code() == Token.TIMESASSIGN
+                        || reader.lookahead(0).code() == Token.DIVIDEASSIGN)
+                {
+                    memSet.setOp(reader.lookahead(0).code());
+                    reader.accept();
+                    
+                    Expression.accept(memSet, reader);
+                    
+                    node.addChild(memSet);
+                    
+                    result = true;
+                }
+                else if (reader.lookahead(0).code() == Token.PLUSPLUS
+                        || reader.lookahead(0).code() == Token.MINUSMINUS)
+                {
+                    memSet.setOp(reader.lookahead(0).code());
+                    reader.accept();
+                    
+                    node.addChild(memSet);
+                    
+                    result = true;
+                }
+                else
+                {
+                    reader.error("MemSet Assign sign expected!");
+                }
             }
             else
             {

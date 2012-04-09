@@ -94,8 +94,6 @@ public class ConditionFactor extends AbstractSyntaxNode
                         falsy = context.getUniqueId("lessfalse");
                         lines.add("IFG J, " + regToUse);
                         lines.add("SET PC, " + falsy);
-                        lines.add("IFE J, " + regToUse);
-                        lines.add("SET PC, " + falsy);
                         lines.add(context.getValue("condFactorInstruction"));
                         lines.add(":" + falsy);
                         break;
@@ -103,6 +101,8 @@ public class ConditionFactor extends AbstractSyntaxNode
                     case Token.LESSEQ:
                         falsy = context.getUniqueId("lesseqfalse");
                         lines.add("IFG J, " + regToUse);
+                        lines.add("SET PC, " + falsy);
+                        lines.add("IFE J, " + regToUse);
                         lines.add("SET PC, " + falsy);
                         lines.add(context.getValue("condFactorInstruction"));
                         lines.add(":" + falsy);

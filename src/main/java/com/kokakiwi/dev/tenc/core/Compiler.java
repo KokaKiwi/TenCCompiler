@@ -15,6 +15,8 @@ import com.kokakiwi.dev.tenc.core.parser.TokenParser;
 
 public class Compiler implements Runnable
 {
+    public static boolean             debug = false;
+    
     private final File                inputFile;
     private final File                outputFile;
     

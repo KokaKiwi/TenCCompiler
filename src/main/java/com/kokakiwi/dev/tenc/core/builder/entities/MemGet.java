@@ -24,12 +24,9 @@ public class MemGet extends Factor
         
         Expression address = (Expression) children.get(0);
         
-        lines.add(";Getting RAM");
-        lines.add(";Calc address");
         Context addressContext = new Context(context);
         addressContext.setValue("__result", "J");
         lines.addAll(address.generate(addressContext));
-        lines.add(";Return value");
         lines.add("SET " + regToUse + ", [J]");
         
         return lines;

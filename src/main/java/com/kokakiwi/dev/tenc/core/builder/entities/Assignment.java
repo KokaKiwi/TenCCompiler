@@ -14,21 +14,48 @@ public class Assignment extends AbstractSyntaxNode
     public final static String regToUse = "X";
     
     private final String       ident;
+    protected int              op;
+    
+    public Assignment()
+    {
+        this(null);
+    }
     
     public Assignment(String ident)
     {
-        this(TYPE, ident);
+        this(ident, -1);
     }
     
     public Assignment(String type, String ident)
     {
+        this(type, ident, -1);
+    }
+    
+    public Assignment(String ident, int op)
+    {
+        this(TYPE, ident, op);
+    }
+    
+    public Assignment(String type, String ident, int op)
+    {
         super(type);
         this.ident = ident;
+        this.op = op;
     }
     
     public String getIdent()
     {
         return ident;
+    }
+    
+    public int getOp()
+    {
+        return op;
+    }
+    
+    public void setOp(int op)
+    {
+        this.op = op;
     }
     
     @Override
@@ -49,13 +76,7 @@ public class Assignment extends AbstractSyntaxNode
     {
         final List<String> lines = Lists.newLinkedList();
         
-        Context exprContext = new Context(context);
-        exprContext.setValue("__result", regToUse);
-        
-        for (AbstractSyntaxNode child : children)
-        {
-            lines.addAll(child.generate(exprContext));
-        }
+        String value = getValue(context, lines);
         
         int offset = context.getOffset(ident);
         lines.add("SET I, SP");
@@ -63,9 +84,63 @@ public class Assignment extends AbstractSyntaxNode
         {
             lines.add("ADD I, " + offset);
         }
-        lines.add("SET [I], " + regToUse);
+        
+        generateOperationLines(lines, op, value, "[I]");
         
         return lines;
+    }
+    
+    protected String getValue(Context context, List<String> lines)
+    {
+        if (op == Token.PLUSPLUS || op == Token.MINUSMINUS)
+        {
+            return "1";
+        }
+        else
+        {
+            Context exprContext = new Context(context);
+            exprContext.setValue("__result", regToUse);
+            
+            for (AbstractSyntaxNode child : children)
+            {
+                lines.addAll(child.generate(exprContext));
+            }
+            
+            return regToUse;
+        }
+    }
+    
+    protected void generateOperationLines(List<String> lines, int op,
+            String value, String dest)
+    {
+        switch (op)
+        {
+            case Token.ASSIGN:
+                lines.add("SET " + dest + ", " + value);
+                break;
+            
+            case Token.PLUSASSIGN:
+            case Token.PLUSPLUS:
+                lines.add("ADD " + dest + ", " + value);
+                break;
+            
+            case Token.MINUSASSIGN:
+            case Token.MINUSMINUS:
+                lines.add("SUB " + dest + ", " + value);
+                break;
+            
+            case Token.TIMESASSIGN:
+                lines.add("MUL " + dest + ", " + value);
+                break;
+            
+            case Token.DIVIDEASSIGN:
+                lines.add("DIV " + dest + ", " + value);
+                break;
+            
+            case Token.MODASSIGN:
+                lines.add("MOD " + dest + ", " + value);
+                break;
+        }
     }
     
     public static boolean accept(AbstractSyntaxNode node, TokenReader reader)
@@ -73,16 +148,39 @@ public class Assignment extends AbstractSyntaxNode
         boolean result = false;
         
         if (reader.lookahead(0).code() == Token.IDENTIFIER
-                && reader.lookahead(1).code() == Token.ASSIGN)
+                && (reader.lookahead(1).code() == Token.ASSIGN
+                        || reader.lookahead(1).code() == Token.PLUSASSIGN
+                        || reader.lookahead(1).code() == Token.MINUSASSIGN
+                        || reader.lookahead(1).code() == Token.TIMESASSIGN || reader
+                        .lookahead(1).code() == Token.DIVIDEASSIGN))
         {
             reader.accept(Token.IDENTIFIER);
-            reader.accept(Token.ASSIGN);
+            reader.accept();
             
             final Token assigned = reader.lookahead(-2);
+            final Token opToken = reader.lookahead(-1);
             
-            final Assignment assignment = new Assignment(assigned.getMatched());
+            final Assignment assignment = new Assignment(assigned.getMatched(),
+                    opToken.code());
             
             Expression.accept(assignment, reader);
+            
+            node.addChild(assignment);
+            
+            result = true;
+        }
+        else if (reader.lookahead(0).code() == Token.IDENTIFIER
+                && (reader.lookahead(1).code() == Token.PLUSPLUS || reader
+                        .lookahead(1).code() == Token.MINUSMINUS))
+        {
+            reader.accept(Token.IDENTIFIER);
+            reader.accept();
+            
+            final Token assigned = reader.lookahead(-2);
+            final Token opToken = reader.lookahead(-1);
+            
+            final Assignment assignment = new Assignment(assigned.getMatched(),
+                    opToken.code());
             
             node.addChild(assignment);
             
