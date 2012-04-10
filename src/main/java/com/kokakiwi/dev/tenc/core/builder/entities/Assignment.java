@@ -3,9 +3,11 @@ package com.kokakiwi.dev.tenc.core.builder.entities;
 import java.util.List;
 
 import com.google.common.collect.Lists;
+import com.kokakiwi.dev.tenc.core.Compiler;
 import com.kokakiwi.dev.tenc.core.builder.AbstractSyntaxNode;
 import com.kokakiwi.dev.tenc.core.builder.TokenReader;
 import com.kokakiwi.dev.tenc.core.generator.Context;
+import com.kokakiwi.dev.tenc.core.generator.entities.*;
 import com.kokakiwi.dev.tenc.core.parser.Token;
 
 public class Assignment extends AbstractSyntaxNode
@@ -72,73 +74,88 @@ public class Assignment extends AbstractSyntaxNode
     }
     
     @Override
-    public List<String> generate(Context context)
+    public List<AssemblyLine> generate(Context context)
     {
-        final List<String> lines = Lists.newLinkedList();
+        final List<AssemblyLine> lines = Lists.newLinkedList();
         
-        String value = getValue(context, lines);
+        Data value = getValue(context, lines);
         
-        int offset = context.getOffset(ident);
-        lines.add("SET I, SP");
-        if (offset != 0)
+        if (!context.getOffsets().containsKey(ident))
         {
-            lines.add("ADD I, " + offset);
+            Context.error("Try to assign a non-existent variable: " + ident);
         }
         
-        generateOperationLines(lines, op, value, "[I]");
+        if (Compiler.debug)
+        {
+            lines.add(new Comment("Start assignment"));
+        }
+        int offset = context.getOffset(ident);
+        
+        if (offset != 0)
+        {
+            lines.add(new Instruction(Opcode.SET, new RegisterAccess("I"),
+                    new RegisterAccess("SP")));
+            lines.add(new Instruction(Opcode.ADD, new RegisterAccess("I"),
+                    new Value(offset)));
+            generateOperationLines(lines, op, new Pointer(new RegisterAccess(
+                    "I")), value);
+        }
+        else
+        {
+            generateOperationLines(lines, op, new Pointer(new RegisterAccess(
+                    "SP")), value);
+        }
         
         return lines;
     }
     
-    protected String getValue(Context context, List<String> lines)
+    protected Data getValue(Context context, List<AssemblyLine> lines)
     {
         if (op == Token.PLUSPLUS || op == Token.MINUSMINUS)
         {
-            return "1";
+            return new Value(1);
         }
         else
         {
             Context exprContext = new Context(context);
             exprContext.setValue("__result", regToUse);
             
-            for (AbstractSyntaxNode child : children)
-            {
-                lines.addAll(child.generate(exprContext));
-            }
+            Expression expr = (Expression) children.get(0);
+            lines.addAll(expr.generate(exprContext));
             
-            return regToUse;
+            return Datas.data(regToUse);
         }
     }
     
-    protected void generateOperationLines(List<String> lines, int op,
-            String value, String dest)
+    protected void generateOperationLines(List<AssemblyLine> lines, int op,
+            Data dest, Data value)
     {
         switch (op)
         {
             case Token.ASSIGN:
-                lines.add("SET " + dest + ", " + value);
+                lines.add(new Instruction(Opcode.SET, dest, value));
                 break;
             
             case Token.PLUSASSIGN:
             case Token.PLUSPLUS:
-                lines.add("ADD " + dest + ", " + value);
+                lines.add(new Instruction(Opcode.ADD, dest, value));
                 break;
             
             case Token.MINUSASSIGN:
             case Token.MINUSMINUS:
-                lines.add("SUB " + dest + ", " + value);
+                lines.add(new Instruction(Opcode.SUB, dest, value));
                 break;
             
             case Token.TIMESASSIGN:
-                lines.add("MUL " + dest + ", " + value);
+                lines.add(new Instruction(Opcode.MUL, dest, value));
                 break;
             
             case Token.DIVIDEASSIGN:
-                lines.add("DIV " + dest + ", " + value);
+                lines.add(new Instruction(Opcode.DIV, dest, value));
                 break;
             
             case Token.MODASSIGN:
-                lines.add("MOD " + dest + ", " + value);
+                lines.add(new Instruction(Opcode.MOD, dest, value));
                 break;
         }
     }

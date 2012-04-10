@@ -3,9 +3,11 @@ package com.kokakiwi.dev.tenc.core.builder.entities;
 import java.util.List;
 
 import com.google.common.collect.Lists;
+import com.kokakiwi.dev.tenc.core.Compiler;
 import com.kokakiwi.dev.tenc.core.builder.AbstractSyntaxNode;
 import com.kokakiwi.dev.tenc.core.builder.TokenReader;
 import com.kokakiwi.dev.tenc.core.generator.Context;
+import com.kokakiwi.dev.tenc.core.generator.entities.*;
 import com.kokakiwi.dev.tenc.core.parser.Token;
 
 public class FunctionCall extends Factor
@@ -39,29 +41,39 @@ public class FunctionCall extends Factor
     }
     
     @Override
-    public List<String> generate(Context context)
+    public List<AssemblyLine> generate(Context context)
     {
-        final List<String> lines = Lists.newLinkedList();
+        final List<AssemblyLine> lines = Lists.newLinkedList();
         
+        if (Compiler.debug)
+        {
+            lines.add(new Comment("Start function call"));
+        }
         Function function = context.getFunction(name);
         if (function == null)
         {
             Context.error("Tried to call non-existant function " + name);
         }
         
-        lines.add("SET PUSH, 0");
-        lines.add("SET I, SP");
+        lines.add(new Instruction(Opcode.SET, new RegisterAccess("PUSH"),
+                new Value(0)));
+        lines.add(new Instruction(Opcode.SET, new RegisterAccess("I"),
+                new RegisterAccess("SP")));
         
         context.setValue("__result", regToUse);
         for (AbstractSyntaxNode child : children)
         {
             lines.addAll(child.generate(context));
-            lines.add("SET PUSH, " + regToUse);
+            lines.add(new Instruction(Opcode.SET, new RegisterAccess("PUSH"),
+                    new RegisterAccess(regToUse)));
         }
         
-        lines.add("SET [I], PC");
-        lines.add("ADD [I], 3");
-        lines.add("SET PC, " + String.format(Function.FUNCTION_MANGLE, name));
+        lines.add(new Instruction(Opcode.SET, new Pointer(new RegisterAccess(
+                "I")), new RegisterAccess("PC")));
+        lines.add(new Instruction(Opcode.SET, new Pointer(new RegisterAccess(
+                "I")), new Value(3)));
+        lines.add(new Instruction(Opcode.SET, new RegisterAccess("PC"),
+                new LabelCall(String.format(Function.FUNCTION_MANGLE, name))));
         
         return lines;
     }

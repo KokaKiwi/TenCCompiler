@@ -1,55 +1,39 @@
 SET PUSH, exit
 SET PUSH, exit
 SET PC, func_main
-:exit SUB PC, 1
+:exit
+SUB PC, 1
 :func_main
+SET X, 65
 SET I, SP
+ADD I, 2
 SET [I], X
-SET Z, 0
-SET Y, Z
-SET X, Y
-SET I, SP
-SET [I], X
-SET Z, 65
-SET Y, Z
-SET X, Y
-SET Z, 256
-SET Y, Z
-SET J, Y
-SET [J], X
+SET X, 0
+SET [SP], X
 :start_while_cond_gen_label_1
-SET I, SP
-SET Z, [I]
-SET Y, Z
-SET J, Y
-SET Z, 30
-SET Y, Z
-SET B, Y
+SET J, [SP]
+SET B, 64
 IFG J, B
 SET PC, lessfalse_gen_label_1
 SET PC, start_while_block_gen_label_1
 :lessfalse_gen_label_1
 SET PC, end_while_block_gen_label_1
 :start_while_block_gen_label_1
-SET Z, 256
-SET Y, Z
-SET J, Y
-SET Z, [J]
-SET Y, Z
-SET X, Y
+SET X, 32768
+ADD X, [SP]
 SET I, SP
-SET Z, [I]
-SET Y, Z
-ADD X, Y
-SET Z, 32768
-SET Y, Z
-SET J, Y
+ADD I, 1
+SET [I], X
 SET I, SP
-SET Z, [I]
-SET Y, Z
-ADD J, Y
+ADD I, 2
+SET X, [I]
+SET I, SP
+ADD I, 1
+SET J, [I]
 SET [J], X
 SET I, SP
+ADD I, 2
 ADD [I], 1
+ADD [SP], 1
 SET PC, start_while_cond_gen_label_1
 :end_while_block_gen_label_1

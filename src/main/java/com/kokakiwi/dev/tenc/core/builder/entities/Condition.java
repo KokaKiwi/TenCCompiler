@@ -3,10 +3,14 @@ package com.kokakiwi.dev.tenc.core.builder.entities;
 import java.util.List;
 
 import com.google.common.collect.Lists;
+import com.kokakiwi.dev.tenc.core.Compiler;
 import com.kokakiwi.dev.tenc.core.builder.AbstractSyntaxNode;
 import com.kokakiwi.dev.tenc.core.builder.TokenReader;
 import com.kokakiwi.dev.tenc.core.generator.Context;
+import com.kokakiwi.dev.tenc.core.generator.entities.AssemblyLine;
+import com.kokakiwi.dev.tenc.core.generator.entities.Instruction;
 import com.kokakiwi.dev.tenc.core.parser.Token;
+import com.kokakiwi.dev.tenc.core.generator.entities.*;
 
 public class Condition extends AbstractSyntaxNode
 {
@@ -18,10 +22,14 @@ public class Condition extends AbstractSyntaxNode
     }
     
     @Override
-    public List<String> generate(Context context)
+    public List<AssemblyLine> generate(Context context)
     {
-        final List<String> lines = Lists.newLinkedList();
+        final List<AssemblyLine> lines = Lists.newLinkedList();
         
+        if (Compiler.debug)
+        {
+            lines.add(new Comment("Start condition"));
+        }
         if (children.size() == 1)
         {
             context.setValue("condTermInstruction",
@@ -34,7 +42,8 @@ public class Condition extends AbstractSyntaxNode
             boolean first = true;
             String trueLabel = context.getUniqueId("or-chain-true");
             String falseLabel = context.getUniqueId("or-chain-false");
-            context.setValue("condTermInstruction", "SET PC, " + trueLabel);
+            context.setValue("condTermInstruction", new Instruction(Opcode.SET,
+                    new RegisterAccess("PC"), new LabelCall(trueLabel)));
             
             for (int i = 0; i < children.size(); i++)
             {
@@ -63,11 +72,14 @@ public class Condition extends AbstractSyntaxNode
                     {
                         AbstractSyntaxNode factor = children.get(i + 1);
                         lines.addAll(factor.generate(context));
-                        lines.add("SET PC, " + falseLabel);
+                        lines.add(new Instruction(Opcode.SET,
+                                new RegisterAccess("PC"), new LabelCall(
+                                        falseLabel)));
                     }
-                    lines.add(":" + trueLabel);
-                    lines.add(context.getValue("condInstruction"));
-                    lines.add(":" + falseLabel);
+                    lines.add(new Label(trueLabel));
+                    lines.add((AssemblyLine) context
+                            .getValue("condInstruction"));
+                    lines.add(new Label(falseLabel));
                 }
             }
         }

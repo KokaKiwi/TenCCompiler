@@ -9,7 +9,7 @@ public class Context
 {
     private final String                name;
     private final Map<String, Function> functions = Maps.newLinkedHashMap();
-    private final Map<String, String>   values = Maps.newLinkedHashMap();
+    private final Map<String, Object>   values    = Maps.newLinkedHashMap();
     private final Map<String, Integer>  offsets   = Maps.newLinkedHashMap();
     private final Map<String, Integer>  ids       = Maps.newLinkedHashMap();
     
@@ -30,7 +30,7 @@ public class Context
     }
     
     public Context(String name, Map<String, Integer> offsets,
-            Map<String, String> values, Map<String, Function> functions,
+            Map<String, Object> values, Map<String, Function> functions,
             Map<String, Integer> ids)
     {
         this.name = name;
@@ -65,7 +65,7 @@ public class Context
         return offsets;
     }
     
-    public Map<String, String> getValues()
+    public Map<String, Object> getValues()
     {
         return values;
     }
@@ -90,12 +90,12 @@ public class Context
         offsets.put(name, value);
     }
     
-    public String getValue(String name)
+    public Object getValue(String name)
     {
         return values.get(name);
     }
     
-    public void setValue(String name, String value)
+    public void setValue(String name, Object value)
     {
         values.put(name, value);
     }

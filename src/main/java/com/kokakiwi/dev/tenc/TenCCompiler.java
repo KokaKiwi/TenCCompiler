@@ -31,9 +31,13 @@ public class TenCCompiler
                     pointer++;
                     outputFile = args[pointer];
                 }
-                else if(arg.equalsIgnoreCase("--debug"))
+                else if (arg.equalsIgnoreCase("--debug"))
                 {
                     Compiler.debug = true;
+                }
+                else if (arg.equalsIgnoreCase("--comments"))
+                {
+                    Compiler.comments = false;
                 }
                 
                 pointer++;
@@ -66,6 +70,7 @@ public class TenCCompiler
     public static void main(String[] args)
     {
         // new BrainfuckLangageCompiler(args);
-        new TenCCompiler(new String[] { "--", "--in", "test.c", "--out", "test.asm" });
+        new TenCCompiler(new String[] { "--", "--nocomments", "--in", "test.c", "--out",
+                "test.asm" });
     }
 }

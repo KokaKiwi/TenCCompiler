@@ -1,14 +1,19 @@
 void main()
 {
-    int a;
+    char c;
+    int pointer;
+    int counter;
     
-    a = 0;
-    [0x0100] = 'A';
+    c = 'A';
+    counter = 0;
     
-    while(a < 30)
+    while(counter < 64)
     {
-        [0x8000 + a] = [0x0100] + a;
+        pointer = 0x8000 + counter;
         
-        a++;
+        [pointer] = c;
+        
+        c++;
+        counter++;
     }
 }

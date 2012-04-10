@@ -3,9 +3,11 @@ package com.kokakiwi.dev.tenc.core.builder.entities;
 import java.util.List;
 
 import com.google.common.collect.Lists;
+import com.kokakiwi.dev.tenc.core.Compiler;
 import com.kokakiwi.dev.tenc.core.builder.AbstractSyntaxNode;
 import com.kokakiwi.dev.tenc.core.builder.TokenReader;
 import com.kokakiwi.dev.tenc.core.generator.Context;
+import com.kokakiwi.dev.tenc.core.generator.entities.*;
 import com.kokakiwi.dev.tenc.core.parser.Token;
 
 public class Term extends AbstractSyntaxNode
@@ -19,18 +21,27 @@ public class Term extends AbstractSyntaxNode
     }
     
     @Override
-    public List<String> generate(Context context)
+    public List<AssemblyLine> generate(Context context)
     {
-        final List<String> lines = Lists.newLinkedList();
+        final List<AssemblyLine> lines = Lists.newLinkedList();
+        
+        if (Compiler.debug)
+        {
+            lines.add(new Comment("Start term"));
+        }
         
         if (children.size() == 1)
         {
             Factor factor = (Factor) children.get(0);
             lines.addAll(factor.generate(context));
-            lines.add("SET " + regToUse + ", " + Factor.regToUse);
         }
         else
         {
+            String oldReg = (String) context.getValue("__result");
+            context.setValue("__result", regToUse);
+            
+            String oldOp = (String) context.getValue("__op");
+            
             boolean first = true;
             for (int i = 0; i < children.size(); i++)
             {
@@ -67,12 +78,11 @@ public class Term extends AbstractSyntaxNode
                         {
                             Factor a = (Factor) children.get(i - 1);
                             Factor b = (Factor) children.get(i + 1);
+                            context.setValue("__op", "SET");
                             lines.addAll(a.generate(context));
-                            lines.add("SET " + regToUse + ", "
-                                    + Factor.regToUse);
+                            context.setValue("__op", operation);
                             lines.addAll(b.generate(context));
-                            lines.add(operation + " " + regToUse + ", "
-                                    + Factor.regToUse);
+                            context.setValue("__op", null);
                             first = false;
                         }
                         else
@@ -85,13 +95,18 @@ public class Term extends AbstractSyntaxNode
                         if (children.get(i + 1) instanceof Factor)
                         {
                             Factor a = (Factor) children.get(i + 1);
+                            context.setValue("__op", operation);
                             lines.addAll(a.generate(context));
-                            lines.add(operation + " " + regToUse + ", "
-                                    + Factor.regToUse);
+                            context.setValue("__op", null);
                         }
                     }
                 }
             }
+            
+            lines.add(new Instruction(new Opcode(oldOp)).first(
+                    new RegisterAccess(oldReg)).second(
+                    new RegisterAccess(regToUse)));
+            context.setValue("__result", oldReg);
         }
         
         return lines;
@@ -120,5 +135,4 @@ public class Term extends AbstractSyntaxNode
         
         return result;
     }
-    
 }

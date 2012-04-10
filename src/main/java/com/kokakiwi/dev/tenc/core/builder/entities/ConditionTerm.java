@@ -3,9 +3,11 @@ package com.kokakiwi.dev.tenc.core.builder.entities;
 import java.util.List;
 
 import com.google.common.collect.Lists;
+import com.kokakiwi.dev.tenc.core.Compiler;
 import com.kokakiwi.dev.tenc.core.builder.AbstractSyntaxNode;
 import com.kokakiwi.dev.tenc.core.builder.TokenReader;
 import com.kokakiwi.dev.tenc.core.generator.Context;
+import com.kokakiwi.dev.tenc.core.generator.entities.*;
 import com.kokakiwi.dev.tenc.core.parser.Token;
 
 public class ConditionTerm extends AbstractSyntaxNode
@@ -18,10 +20,14 @@ public class ConditionTerm extends AbstractSyntaxNode
     }
     
     @Override
-    public List<String> generate(Context context)
+    public List<AssemblyLine> generate(Context context)
     {
-        final List<String> lines = Lists.newLinkedList();
+        final List<AssemblyLine> lines = Lists.newLinkedList();
         
+        if (Compiler.debug)
+        {
+            lines.add(new Comment("Start condition term"));
+        }
         if (children.size() == 1)
         {
             context.setValue("condFactorInstruction",
@@ -56,16 +62,23 @@ public class ConditionTerm extends AbstractSyntaxNode
                         AbstractSyntaxNode a = children.get(i - 1);
                         AbstractSyntaxNode b = children.get(i + 1);
                         
-                        context.setValue("condFactorInstruction", "SET PC, "
-                                + aTrueLabel);
+                        context.setValue("condFactorInstruction",
+                                new Instruction(Opcode.SET, new RegisterAccess(
+                                        "PC"), new LabelCall(aTrueLabel)));
+                        
                         lines.addAll(a.generate(context));
-                        lines.add("SET PC, " + falseLabel);
-                        lines.add(":" + aTrueLabel);
-                        context.setValue("condFactorInstruction", "SET PC, "
-                                + bTrueLabel);
+                        lines.add(new Instruction(Opcode.SET,
+                                new RegisterAccess("PC"), new LabelCall(
+                                        falseLabel)));
+                        lines.add(new Label(aTrueLabel));
+                        context.setValue("condFactorInstruction",
+                                new Instruction(Opcode.SET, new RegisterAccess(
+                                        "PC"), new LabelCall(bTrueLabel)));
                         lines.addAll(b.generate(context));
-                        lines.add("SET PC, " + falseLabel);
-                        lines.add(":" + bTrueLabel);
+                        lines.add(new Instruction(Opcode.SET,
+                                new RegisterAccess("PC"), new LabelCall(
+                                        falseLabel)));
+                        lines.add(new Label(bTrueLabel));
                         first = false;
                     }
                     else
@@ -73,14 +86,18 @@ public class ConditionTerm extends AbstractSyntaxNode
                         String cTrueLabel = context.getUniqueId("c-true");
                         AbstractSyntaxNode c = children.get(i + 1);
                         
-                        context.setValue("condFactorInstruction", "SET PC, "
-                                + cTrueLabel);
+                        context.setValue("condFactorInstruction",
+                                new Instruction(Opcode.SET, new RegisterAccess(
+                                        "PC"), new LabelCall(cTrueLabel)));
                         lines.addAll(c.generate(context));
-                        lines.add("SET PC, " + falseLabel);
-                        lines.add(":" + cTrueLabel);
+                        lines.add(new Instruction(Opcode.SET,
+                                new RegisterAccess("PC"), new LabelCall(
+                                        falseLabel)));
+                        lines.add(new Label(cTrueLabel));
                     }
-                    lines.add(context.getValue("condTermInstruction"));
-                    lines.add(":" + falseLabel);
+                    lines.add((AssemblyLine) context
+                            .getValue("condTermInstruction"));
+                    lines.add(new Label(falseLabel));
                 }
             }
         }

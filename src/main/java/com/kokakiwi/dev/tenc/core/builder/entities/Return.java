@@ -3,9 +3,11 @@ package com.kokakiwi.dev.tenc.core.builder.entities;
 import java.util.List;
 
 import com.google.common.collect.Lists;
+import com.kokakiwi.dev.tenc.core.Compiler;
 import com.kokakiwi.dev.tenc.core.builder.AbstractSyntaxNode;
 import com.kokakiwi.dev.tenc.core.builder.TokenReader;
 import com.kokakiwi.dev.tenc.core.generator.Context;
+import com.kokakiwi.dev.tenc.core.generator.entities.*;
 import com.kokakiwi.dev.tenc.core.parser.Token;
 
 public class Return extends AbstractSyntaxNode
@@ -19,10 +21,14 @@ public class Return extends AbstractSyntaxNode
     }
     
     @Override
-    public List<String> generate(Context context)
+    public List<AssemblyLine> generate(Context context)
     {
-        final List<String> lines = Lists.newLinkedList();
+        final List<AssemblyLine> lines = Lists.newLinkedList();
         
+        if (Compiler.debug)
+        {
+            lines.add(new Comment("Start return"));
+        }
         Function function = context.getFunction(context.getName());
         if (function.getReturnType().getType().equalsIgnoreCase("void"))
         {
@@ -41,8 +47,11 @@ public class Return extends AbstractSyntaxNode
                 }
                 int offset = context.getOffset("__return");
                 
-                lines.add("ADD SP, " + offset);
-                lines.add("SET PC, POP");
+                lines.add(new Instruction(Opcode.ADD).first(
+                        new RegisterAccess("SP")).second(new Value(offset)));
+                lines.add(new Instruction(Opcode.SET).first(
+                        new RegisterAccess("PC")).second(
+                        new RegisterAccess("POP")));
             }
             else
             {

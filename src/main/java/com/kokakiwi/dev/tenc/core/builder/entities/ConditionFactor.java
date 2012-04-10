@@ -3,9 +3,11 @@ package com.kokakiwi.dev.tenc.core.builder.entities;
 import java.util.List;
 
 import com.google.common.collect.Lists;
+import com.kokakiwi.dev.tenc.core.Compiler;
 import com.kokakiwi.dev.tenc.core.builder.AbstractSyntaxNode;
 import com.kokakiwi.dev.tenc.core.builder.TokenReader;
 import com.kokakiwi.dev.tenc.core.generator.Context;
+import com.kokakiwi.dev.tenc.core.generator.entities.*;
 import com.kokakiwi.dev.tenc.core.parser.Token;
 
 public class ConditionFactor extends AbstractSyntaxNode
@@ -22,10 +24,14 @@ public class ConditionFactor extends AbstractSyntaxNode
     }
     
     @Override
-    public List<String> generate(Context context)
+    public List<AssemblyLine> generate(Context context)
     {
-        final List<String> lines = Lists.newLinkedList();
+        final List<AssemblyLine> lines = Lists.newLinkedList();
         
+        if (Compiler.debug)
+        {
+            lines.add(new Comment("Start condition factor"));
+        }
         AbstractSyntaxNode comp = children.get(0);
         
         if (comp instanceof Boolean)
@@ -35,14 +41,16 @@ public class ConditionFactor extends AbstractSyntaxNode
             {
                 if (expectedResult)
                 {
-                    lines.add(context.getValue("condFactorInstruction"));
+                    lines.add((AssemblyLine) context
+                            .getValue("condFactorInstruction"));
                 }
             }
             else
             {
                 if (!expectedResult)
                 {
-                    lines.add(context.getValue("condFactorInstruction"));
+                    lines.add((AssemblyLine) context
+                            .getValue("condFactorInstruction"));
                 }
             }
         }
@@ -57,13 +65,16 @@ public class ConditionFactor extends AbstractSyntaxNode
                 lines.addAll(e1.generate(context));
                 if (expectedResult)
                 {
-                    lines.add("IFE 1, " + Identifier.regToUse);
+                    lines.add(new Instruction(Opcode.IFE, new Value(1),
+                            new RegisterAccess(Identifier.regToUse)));
                 }
                 else
                 {
-                    lines.add("IFN 1, " + Identifier.regToUse);
+                    lines.add(new Instruction(Opcode.IFN, new Value(1),
+                            new RegisterAccess(Identifier.regToUse)));
                 }
-                lines.add(context.getValue("condFactorInstruction"));
+                lines.add((AssemblyLine) context
+                        .getValue("condFactorInstruction"));
             }
             else
             {
@@ -79,43 +90,69 @@ public class ConditionFactor extends AbstractSyntaxNode
                 switch (op.getOpType())
                 {
                     case Token.GREATER:
-                        lines.add("IFG J, " + regToUse);
-                        lines.add(context.getValue("condFactorInstruction"));
+                        lines.add(new Instruction(Opcode.IFG,
+                                new RegisterAccess("J"), new RegisterAccess(
+                                        regToUse)));
+                        lines.add((AssemblyLine) context
+                                .getValue("condFactorInstruction"));
                         break;
                     
                     case Token.GREATEREQ:
-                        lines.add("IFG J, " + regToUse);
-                        lines.add(context.getValue("condFactorInstruction"));
-                        lines.add("IFE J, " + regToUse);
-                        lines.add(context.getValue("condFactorInstruction"));
+                        lines.add(new Instruction(Opcode.IFG,
+                                new RegisterAccess("J"), new RegisterAccess(
+                                        regToUse)));
+                        lines.add((AssemblyLine) context
+                                .getValue("condFactorInstruction"));
+                        lines.add(new Instruction(Opcode.IFE,
+                                new RegisterAccess("J"), new RegisterAccess(
+                                        regToUse)));
+                        lines.add((AssemblyLine) context
+                                .getValue("condFactorInstruction"));
                         break;
                     
                     case Token.LESSTHAN:
                         falsy = context.getUniqueId("lessfalse");
-                        lines.add("IFG J, " + regToUse);
-                        lines.add("SET PC, " + falsy);
-                        lines.add(context.getValue("condFactorInstruction"));
-                        lines.add(":" + falsy);
+                        lines.add(new Instruction(Opcode.IFG,
+                                new RegisterAccess("J"), new RegisterAccess(
+                                        regToUse)));
+                        lines.add(new Instruction(Opcode.SET,
+                                new RegisterAccess("PC"), new LabelCall(falsy)));
+                        lines.add((AssemblyLine) context
+                                .getValue("condFactorInstruction"));
+                        lines.add(new Label(falsy));
                         break;
                     
                     case Token.LESSEQ:
                         falsy = context.getUniqueId("lesseqfalse");
-                        lines.add("IFG J, " + regToUse);
-                        lines.add("SET PC, " + falsy);
-                        lines.add("IFE J, " + regToUse);
-                        lines.add("SET PC, " + falsy);
-                        lines.add(context.getValue("condFactorInstruction"));
-                        lines.add(":" + falsy);
+                        lines.add(new Instruction(Opcode.IFG,
+                                new RegisterAccess("J"), new RegisterAccess(
+                                        regToUse)));
+                        lines.add(new Instruction(Opcode.SET,
+                                new RegisterAccess("PC"), new LabelCall(falsy)));
+                        lines.add(new Instruction(Opcode.IFE,
+                                new RegisterAccess("J"), new RegisterAccess(
+                                        regToUse)));
+                        lines.add(new Instruction(Opcode.SET,
+                                new RegisterAccess("PC"), new LabelCall(falsy)));
+                        lines.add((AssemblyLine) context
+                                .getValue("condFactorInstruction"));
+                        lines.add(new Label(falsy));
                         break;
                     
                     case Token.EQUAL:
-                        lines.add("IFE J, " + regToUse);
-                        lines.add(context.getValue("condFactorInstruction"));
+                        lines.add(new Instruction(Opcode.IFE,
+                                new RegisterAccess("J"), new RegisterAccess(
+                                        regToUse)));
+                        lines.add((AssemblyLine) context
+                                .getValue("condFactorInstruction"));
                         break;
                     
                     case Token.NOTEQUAL:
-                        lines.add("IFN J, " + regToUse);
-                        lines.add(context.getValue("condFactorInstruction"));
+                        lines.add(new Instruction(Opcode.IFN,
+                                new RegisterAccess("J"), new RegisterAccess(
+                                        regToUse)));
+                        lines.add((AssemblyLine) context
+                                .getValue("condFactorInstruction"));
                         break;
                 }
             }

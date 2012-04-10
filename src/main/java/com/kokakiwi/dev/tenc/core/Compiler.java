@@ -7,15 +7,19 @@ import java.util.List;
 
 import org.apache.commons.io.IOUtils;
 
+import com.google.common.collect.Lists;
 import com.kokakiwi.dev.tenc.core.builder.AbstractSyntaxTreeBuilder;
 import com.kokakiwi.dev.tenc.core.builder.entities.Program;
 import com.kokakiwi.dev.tenc.core.generator.Generator;
+import com.kokakiwi.dev.tenc.core.generator.entities.AssemblyLine;
+import com.kokakiwi.dev.tenc.core.generator.entities.Comment;
 import com.kokakiwi.dev.tenc.core.parser.TencTokenMaker;
 import com.kokakiwi.dev.tenc.core.parser.TokenParser;
 
 public class Compiler implements Runnable
 {
-    public static boolean             debug = false;
+    public static boolean             debug    = false;
+    public static boolean             comments = true;
     
     private final File                inputFile;
     private final File                outputFile;
@@ -58,9 +62,22 @@ public class Compiler implements Runnable
             System.out.println(program.toString());
             
             final Generator generator = new Generator(program);
-            final List<String> assembly = generator.generate();
+            final List<AssemblyLine> assembly = generator.generate();
             
-            IOUtils.writeLines(assembly, null, new FileOutputStream(outputFile));
+            List<String> lines = Lists.newLinkedList();
+            for (AssemblyLine line : assembly)
+            {
+                if (line instanceof Comment && comments)
+                {
+                    lines.add(line.generate());
+                }
+                else
+                {
+                    lines.add(line.generate());
+                }
+            }
+            
+            IOUtils.writeLines(lines, null, new FileOutputStream(outputFile));
         }
         catch (final Exception e)
         {

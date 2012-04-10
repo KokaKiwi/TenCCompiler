@@ -143,7 +143,7 @@ LineCommentBegin                 = "//"
 
     {LineTerminator}                {  }
     {Identifier}                    { addToken(Token.IDENTIFIER); }
-    {PointerIdentifier}             { addToken(Token.POINTER_IDENTIFIER); }
+    /*{PointerIdentifier}             { addToken(Token.POINTER_IDENTIFIER); }*/
     {WhiteSpace}+                   {  }
     
     

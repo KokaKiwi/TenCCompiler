@@ -6,6 +6,7 @@ import com.google.common.collect.Lists;
 import com.kokakiwi.dev.tenc.core.builder.AbstractSyntaxNode;
 import com.kokakiwi.dev.tenc.core.builder.TokenReader;
 import com.kokakiwi.dev.tenc.core.generator.Context;
+import com.kokakiwi.dev.tenc.core.generator.entities.*;
 import com.kokakiwi.dev.tenc.core.parser.Token;
 
 /**
@@ -56,11 +57,12 @@ public class Function extends AbstractSyntaxNode
     }
     
     @Override
-    public List<String> generate(Context context)
+    public List<AssemblyLine> generate(Context context)
     {
-        final List<String> lines = Lists.newLinkedList();
+        final List<AssemblyLine> lines = Lists.newLinkedList();
         
-        lines.add(":" + String.format(FUNCTION_MANGLE, returnType.getName()));
+        lines.add(new Label(
+                String.format(FUNCTION_MANGLE, returnType.getName())));
         
         Context funcContext = generateContext(context);
         

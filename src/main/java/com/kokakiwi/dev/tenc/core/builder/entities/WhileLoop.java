@@ -3,9 +3,11 @@ package com.kokakiwi.dev.tenc.core.builder.entities;
 import java.util.List;
 
 import com.google.common.collect.Lists;
+import com.kokakiwi.dev.tenc.core.Compiler;
 import com.kokakiwi.dev.tenc.core.builder.AbstractSyntaxNode;
 import com.kokakiwi.dev.tenc.core.builder.TokenReader;
 import com.kokakiwi.dev.tenc.core.generator.Context;
+import com.kokakiwi.dev.tenc.core.generator.entities.*;
 import com.kokakiwi.dev.tenc.core.parser.Token;
 
 public class WhileLoop extends AbstractSyntaxNode
@@ -18,10 +20,14 @@ public class WhileLoop extends AbstractSyntaxNode
     }
     
     @Override
-    public List<String> generate(Context context)
+    public List<AssemblyLine> generate(Context context)
     {
-        final List<String> lines = Lists.newLinkedList();
+        final List<AssemblyLine> lines = Lists.newLinkedList();
         
+        if (Compiler.debug)
+        {
+            lines.add(new Comment("Start while"));
+        }
         String condStart = context.getUniqueId("start_while_cond");
         String blockStart = context.getUniqueId("start_while_block");
         String blockEnd = context.getUniqueId("end_while_block");
@@ -29,14 +35,18 @@ public class WhileLoop extends AbstractSyntaxNode
         Condition cond = (Condition) children.get(0);
         Block block = (Block) children.get(1);
         
-        lines.add(":" + condStart);
-        context.setValue("condInstruction", "SET PC, " + blockStart);
+        lines.add(new Label(condStart));
+        context.setValue("condInstruction",
+                new Instruction(Opcode.SET).first(new RegisterAccess("PC"))
+                        .second(new LabelCall(blockStart)));
         lines.addAll(cond.generate(context));
-        lines.add("SET PC, " + blockEnd);
-        lines.add(":" + blockStart);
+        lines.add(new Instruction(Opcode.SET).first(new RegisterAccess("PC"))
+                .second(new LabelCall(blockEnd)));
+        lines.add(new Label(blockStart));
         lines.addAll(block.generate(context));
-        lines.add("SET PC, " + condStart);
-        lines.add(":" + blockEnd);
+        lines.add(new Instruction(Opcode.SET).first(new RegisterAccess("PC"))
+                .second(new LabelCall(condStart)));
+        lines.add(new Label(blockEnd));
         
         return lines;
     }

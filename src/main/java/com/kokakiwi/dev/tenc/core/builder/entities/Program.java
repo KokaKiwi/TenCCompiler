@@ -6,6 +6,7 @@ import com.google.common.collect.Lists;
 import com.kokakiwi.dev.tenc.core.builder.AbstractSyntaxNode;
 import com.kokakiwi.dev.tenc.core.builder.TokenReader;
 import com.kokakiwi.dev.tenc.core.generator.Context;
+import com.kokakiwi.dev.tenc.core.generator.entities.AssemblyLine;
 
 public class Program extends AbstractSyntaxNode
 {
@@ -25,9 +26,9 @@ public class Program extends AbstractSyntaxNode
     }
     
     @Override
-    public List<String> generate(Context context)
+    public List<AssemblyLine> generate(Context context)
     {
-        final List<String> lines = Lists.newLinkedList();
+        final List<AssemblyLine> lines = Lists.newLinkedList();
         
         for (final AbstractSyntaxNode child : children)
         {

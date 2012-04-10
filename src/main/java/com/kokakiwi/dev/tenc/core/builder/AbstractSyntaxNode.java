@@ -5,6 +5,7 @@ import java.util.List;
 import com.google.common.collect.Lists;
 import com.kokakiwi.dev.tenc.core.generator.Context;
 import com.kokakiwi.dev.tenc.core.generator.Renderable;
+import com.kokakiwi.dev.tenc.core.generator.entities.AssemblyLine;
 
 public abstract class AbstractSyntaxNode implements Renderable
 {
@@ -37,9 +38,9 @@ public abstract class AbstractSyntaxNode implements Renderable
         return parent.getChildren();
     }
     
-    public List<String> generate(Context context)
+    public List<AssemblyLine> generate(Context context)
     {
-        final List<String> lines = Lists.newLinkedList();
+        final List<AssemblyLine> lines = Lists.newLinkedList();
         
         for (final AbstractSyntaxNode child : children)
         {

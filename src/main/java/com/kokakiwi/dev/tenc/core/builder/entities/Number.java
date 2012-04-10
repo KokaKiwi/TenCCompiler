@@ -3,9 +3,11 @@ package com.kokakiwi.dev.tenc.core.builder.entities;
 import java.util.List;
 
 import com.google.common.collect.Lists;
+import com.kokakiwi.dev.tenc.core.Compiler;
 import com.kokakiwi.dev.tenc.core.builder.AbstractSyntaxNode;
 import com.kokakiwi.dev.tenc.core.builder.TokenReader;
 import com.kokakiwi.dev.tenc.core.generator.Context;
+import com.kokakiwi.dev.tenc.core.generator.entities.*;
 import com.kokakiwi.dev.tenc.core.parser.Token;
 
 public class Number extends Factor
@@ -44,11 +46,28 @@ public class Number extends Factor
     }
     
     @Override
-    public List<String> generate(Context context)
+    public List<AssemblyLine> generate(Context context)
     {
-        final List<String> lines = Lists.newLinkedList();
+        final List<AssemblyLine> lines = Lists.newLinkedList();
         
-        lines.add("SET " + regToUse + ", " + number);
+        String reg = regToUse;
+        if (context.getValue("__result") != null)
+        {
+            reg = (String) context.getValue("__result");
+        }
+        
+        String op = "SET";
+        if (context.getValue("__op") != null)
+        {
+            op = (String) context.getValue("__op");
+        }
+        
+        if (Compiler.debug)
+        {
+            lines.add(new Comment("Start number"));
+        }
+        lines.add(new Instruction(new Opcode(op), new RegisterAccess(reg),
+                new Value(number)));
         
         return lines;
     }

@@ -3,9 +3,11 @@ package com.kokakiwi.dev.tenc.core.builder.entities;
 import java.util.List;
 
 import com.google.common.collect.Lists;
+import com.kokakiwi.dev.tenc.core.Compiler;
 import com.kokakiwi.dev.tenc.core.builder.AbstractSyntaxNode;
 import com.kokakiwi.dev.tenc.core.builder.TokenReader;
 import com.kokakiwi.dev.tenc.core.generator.Context;
+import com.kokakiwi.dev.tenc.core.generator.entities.*;
 import com.kokakiwi.dev.tenc.core.parser.Token;
 
 public class MemSet extends Assignment
@@ -19,26 +21,30 @@ public class MemSet extends Assignment
     }
     
     @Override
-    public List<String> generate(Context context)
+    public List<AssemblyLine> generate(Context context)
     {
-        List<String> lines = Lists.newLinkedList();
+        List<AssemblyLine> lines = Lists.newLinkedList();
         
-        String value = getValue(context, lines);
+        if (Compiler.debug)
+        {
+            lines.add(new Comment("Start memset"));
+        }
+        Data value = getValue(context, lines);
         
         Expression address = (Expression) children.get(0);
         context.setValue("__result", "J");
         lines.addAll(address.generate(context));
         
-        generateOperationLines(lines, op, value, "[J]");
+        generateOperationLines(lines, op, Datas.data("[J]"), value);
         
         return lines;
     }
     
-    protected String getValue(Context context, List<String> lines)
+    protected Data getValue(Context context, List<AssemblyLine> lines)
     {
         if (op == Token.PLUSPLUS || op == Token.MINUSMINUS)
         {
-            return "1";
+            return new Value(1);
         }
         else
         {
@@ -49,7 +55,7 @@ public class MemSet extends Assignment
             context.setValue("__result", regToUse);
             lines.addAll(value.generate(context));
             
-            return regToUse;
+            return Datas.data(regToUse);
         }
     }
     
