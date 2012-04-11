@@ -11,6 +11,7 @@ public class Token
     public final static int RETURN             = 2;
     public final static int NULL               = 3;
     public final static int UNKNOWN            = 4;
+    public final static int ELSE               = 5;
     
     /* Blocks */
     public final static int OPEN_BRACK         = 30;

@@ -1,19 +1,18 @@
 void main()
 {
     char c;
-    int pointer;
-    int counter;
+    int i = 35;
     
-    c = 'A';
-    counter = 0;
-    
-    while(counter < 64)
+    if(i == 35)
     {
-        pointer = 0x8000 + counter;
-        
-        [pointer] = c;
-        
-        c++;
-        counter++;
+        c = 'Y';
+    }
+    else if(i == 36)
+    {
+        c = 'E';
+    }
+    else
+    {
+        c = 'S';
     }
 }

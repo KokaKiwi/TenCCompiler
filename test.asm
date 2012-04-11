@@ -4,36 +4,35 @@ SET PC, func_main
 :exit
 SUB PC, 1
 :func_main
-SET X, 65
-SET I, SP
-ADD I, 2
-SET [I], X
-SET X, 0
+SET X, 35
 SET [SP], X
-:start_while_cond_gen_label_1
 SET J, [SP]
-SET B, 64
-IFG J, B
-SET PC, lessfalse_gen_label_1
-SET PC, start_while_block_gen_label_1
-:lessfalse_gen_label_1
-SET PC, end_while_block_gen_label_1
-:start_while_block_gen_label_1
-SET X, 32768
-ADD X, [SP]
+SET B, 35
+IFE J, B
+SET PC, start_if_block_gen_label_1
+SET PC, start_else_block_gen_label_1
+:start_if_block_gen_label_1
+SET X, 89
 SET I, SP
 ADD I, 1
 SET [I], X
-SET I, SP
-ADD I, 2
-SET X, [I]
+SET PC, end_if_block_gen_label_1
+:start_else_block_gen_label_1
+SET J, [SP]
+SET B, 36
+IFE J, B
+SET PC, start_if_block_gen_label_2
+SET PC, start_else_block_gen_label_2
+:start_if_block_gen_label_2
+SET X, 69
 SET I, SP
 ADD I, 1
-SET J, [I]
-SET [J], X
+SET [I], X
+SET PC, end_if_block_gen_label_2
+:start_else_block_gen_label_2
+SET X, 83
 SET I, SP
-ADD I, 2
-ADD [I], 1
-ADD [SP], 1
-SET PC, start_while_cond_gen_label_1
-:end_while_block_gen_label_1
+ADD I, 1
+SET [I], X
+:end_if_block_gen_label_2
+:end_if_block_gen_label_1

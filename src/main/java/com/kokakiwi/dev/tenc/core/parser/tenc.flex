@@ -137,6 +137,7 @@ LineCommentBegin                 = "//"
     
     /* Blocks */
     "if"                            { addToken(Token.IF); }
+    "else"                          { addToken(Token.ELSE); }
     "while"                         { addToken(Token.WHILE); }
     "return"                        { addToken(Token.RETURN); }
     "null"                          { addToken(Token.NULL); }
