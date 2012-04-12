@@ -38,6 +38,11 @@ public class Function extends AbstractSyntaxNode
         return args;
     }
     
+    public int getSize()
+    {
+        return size;
+    }
+    
     @Override
     public String represent()
     {
@@ -76,6 +81,18 @@ public class Function extends AbstractSyntaxNode
         Block block = (Block) children.get(0);
         lines.addAll(block.generate(funcContext));
         
+        if ((block.getChildren().size() > 0 && !(block.getChildren().get(
+                block.getChildren().size() - 1) instanceof Return))
+                || block.getChildren().size() == 0)
+        {
+            generateExitLines(lines);
+        }
+        
+        return lines;
+    }
+    
+    public void generateExitLines(List<AssemblyLine> lines)
+    {
         if (size > 0)
         {
             lines.add(new Instruction(Opcode.ADD).first(
@@ -91,8 +108,6 @@ public class Function extends AbstractSyntaxNode
             lines.add(new Instruction(Opcode.SET).first(
                     new RegisterAccess("PC")).second(new LabelCall("exit")));
         }
-        
-        return lines;
     }
     
     protected Context generateContext(Context parent)

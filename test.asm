@@ -4,27 +4,25 @@ SET PC, func_main
 :exit
 SUB PC, 1
 :func_main
-SET A, 72
-JSR func_write
-SET A, 101
-JSR func_write
-SET A, 108
-JSR func_write
-SET A, 108
-JSR func_write
-SET A, 111
-JSR func_write
-SET PC, exit
-:func_write
-SUB SP, 1
-SET X, 32768
-SET J, 256
-ADD X, [J]
+SUB SP, 2
+SET X, 6
+ADD X, 3
 SET [SP], X
+SET A, [SP]
+SET B, 35
+JSR func_test
 SET X, A
-SET J, [SP]
-SET [J], X
-SET J, 256
-ADD [J], 1
+SET I, SP
+SET [I+1], X
+ADD SP, 2
+SET PC, exit
+:func_test
+SUB SP, 1
+SET Y, A
+MUL Y, B
+SET X, Y
+ADD X, 6
+SET [SP], X
+SET A, [SP]
 ADD SP, 1
 SET PC, POP

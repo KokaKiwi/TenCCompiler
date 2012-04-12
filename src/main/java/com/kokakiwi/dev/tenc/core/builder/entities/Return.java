@@ -44,16 +44,21 @@ public class Return extends AbstractSyntaxNode
                 Expression expr = (Expression) children.get(0);
                 
                 Context exprContext = new Context(context);
-                exprContext.setValue("__result", "A");
-                lines.addAll(expr.generate(exprContext));
-                
-                // int offset = context.getOffset("__return");
-                
-                // lines.add(new Instruction(Opcode.ADD).first(
-                // new RegisterAccess("SP")).second(new Value(offset)));
-                // lines.add(new Instruction(Opcode.SET).first(
-                // new RegisterAccess("PC")).second(
-                // new RegisterAccess("POP")));
+                if (expr.getChildren().size() == 1)
+                {
+                    exprContext.setValue("__result", "A");
+                    lines.addAll(expr.generate(exprContext));
+                    function.generateExitLines(lines);
+                }
+                else
+                {
+                    exprContext.setValue("__result", "X");
+                    lines.addAll(expr.generate(exprContext));
+                    lines.add(new Instruction(Opcode.SET).first(
+                            new RegisterAccess("A")).second(
+                            new RegisterAccess("X")));
+                    function.generateExitLines(lines);
+                }
             }
             else
             {

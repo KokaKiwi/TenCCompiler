@@ -62,9 +62,38 @@ public class FunctionCall extends Factor
                     + name);
         }
         
-        // TODO Create a callee context
         Context callContext = new Context(context);
         int offset = 0;
+        
+        Function parentFunction = context.getFunction(context.getName());
+        for (int i = 0; i < parentFunction.getArgs().length; i++)
+        {
+            String reg = null;
+            switch (i)
+            {
+                case 0:
+                    reg = "A";
+                    break;
+                
+                case 1:
+                    reg = "B";
+                    break;
+                
+                case 2:
+                    reg = "C";
+                    
+                    break;
+            }
+            
+            if (reg != null)
+            {
+                lines.add(new Instruction(Opcode.SET).first(
+                        new RegisterAccess("PUSH")).second(
+                        new RegisterAccess(reg)));
+            }
+        }
+        
+        // TODO Save registers
         
         for (int i = 0; i < children.size(); i++)
         {
@@ -110,42 +139,51 @@ public class FunctionCall extends Factor
                 reg = (String) context.getValue("__result");
             }
             
-            String op = "SET";
-            if (context.getValue("__op") != null)
+            if (!reg.equalsIgnoreCase("A"))
             {
-                op = (String) context.getValue("__op");
+                String op = "SET";
+                if (context.getValue("__op") != null)
+                {
+                    op = (String) context.getValue("__op");
+                }
+                
+                lines.add(new Instruction(new Opcode(op)).first(
+                        new RegisterAccess(reg))
+                        .second(new RegisterAccess("A")));
+            }
+        }
+        
+        for (int i = 0; i < parentFunction.getArgs().length; i++)
+        {
+            String reg = null;
+            switch (i)
+            {
+                case 0:
+                    reg = "A";
+                    break;
+                
+                case 1:
+                    reg = "B";
+                    break;
+                
+                case 2:
+                    reg = "C";
+                    
+                    break;
             }
             
-            lines.add(new Instruction(new Opcode(op)).first(
-                    new RegisterAccess(reg)).second(new RegisterAccess("A")));
+            if (reg != null)
+            {
+                lines.add(new Instruction(Opcode.SET).first(
+                        new RegisterAccess(reg)).second(
+                        new RegisterAccess("POP")));
+            }
         }
+        
+        // TODO Retrieve registers
         
         return lines;
     }
-    
-    //@formatter:off
-    /*
-     * lines.add(new Instruction(Opcode.SET, new RegisterAccess("PUSH"),
-                new Value(0)));
-        lines.add(new Instruction(Opcode.SET, new RegisterAccess("I"),
-                new RegisterAccess("SP")));
-        
-        context.setValue("__result", regToUse);
-        for (AbstractSyntaxNode child : children)
-        {
-            lines.addAll(child.generate(context));
-            lines.add(new Instruction(Opcode.SET, new RegisterAccess("PUSH"),
-                    new RegisterAccess(regToUse)));
-        }
-        
-        lines.add(new Instruction(Opcode.SET, new Pointer(new RegisterAccess(
-                "I")), new RegisterAccess("PC")));
-        lines.add(new Instruction(Opcode.SUB, new Pointer(new RegisterAccess(
-                "I")), new Value(3)));
-        lines.add(new Instruction(Opcode.SET, new RegisterAccess("PC"),
-                new LabelCall(String.format(Function.FUNCTION_MANGLE, name))));
-     */
-    //@formatter:on
     
     public static boolean accept(AbstractSyntaxNode node, TokenReader reader)
     {

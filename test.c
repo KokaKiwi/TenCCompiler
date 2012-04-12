@@ -1,17 +1,13 @@
 void main()
 {
-    write('H');
-    write('e');
-    write('l');
-    write('l');
-    write('o');
+    int a = 6 + 3;
+    
+    int b = test(a, 35);
 }
 
-void write(char c)
+int test(int a, int b)
 {
-    int pointer = 0x8000 + [0x0100];
+    int c = a * b + 6;
     
-    [pointer] = c;
-    
-    [0x0100]++;
+    return c;
 }

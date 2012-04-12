@@ -74,8 +74,12 @@ public class Identifier extends Factor
         }
         else if (data instanceof RegisterAccess)
         {
-            lines.add(new Instruction(new Opcode(op)).first(
-                    new RegisterAccess(reg)).second(data));
+            if (!(op.equalsIgnoreCase("SET") && reg
+                    .equalsIgnoreCase(((RegisterAccess) data).getRegisterName())))
+            {
+                lines.add(new Instruction(new Opcode(op)).first(
+                        new RegisterAccess(reg)).second(data));
+            }
         }
         else if (data instanceof Pointer)
         {
