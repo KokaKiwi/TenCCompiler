@@ -19,6 +19,7 @@ public class Function extends AbstractSyntaxNode
     
     protected final Type       returnType;
     protected final Type[]     args;
+    protected int              size            = 0;
     
     public Function(Type returnType, Type[] args)
     {
@@ -66,9 +67,29 @@ public class Function extends AbstractSyntaxNode
         
         Context funcContext = generateContext(context);
         
-        for (final AbstractSyntaxNode child : children)
+        if (size > 0)
         {
-            lines.addAll(child.generate(funcContext));
+            lines.add(new Instruction(Opcode.SUB).first(
+                    new RegisterAccess("SP")).second(new Value(size)));
+        }
+        
+        Block block = (Block) children.get(0);
+        lines.addAll(block.generate(funcContext));
+        
+        if (size > 0)
+        {
+            lines.add(new Instruction(Opcode.ADD).first(
+                    new RegisterAccess("SP")).second(new Value(size)));
+        }
+        if (!returnType.getName().equalsIgnoreCase("main"))
+        {
+            lines.add(new Instruction(Opcode.SET).first(
+                    new RegisterAccess("PC")).second(new RegisterAccess("POP")));
+        }
+        else
+        {
+            lines.add(new Instruction(Opcode.SET).first(
+                    new RegisterAccess("PC")).second(new LabelCall("exit")));
         }
         
         return lines;
@@ -78,29 +99,39 @@ public class Function extends AbstractSyntaxNode
     {
         final Context funcContext = new Context(returnType.getName(), parent);
         
-        int numArgs = args.length;
-        funcContext.setOffset("__return", numArgs);
-        for (int i = 0; i < args.length; i++)
+        Block block = (Block) children.get(0);
+        for (AbstractSyntaxNode child : block.getChildren())
         {
-            Type arg = args[i];
-            funcContext.setOffset(arg.getName(), args.length - 1 - i);
+            if (child instanceof Creation)
+            {
+                Creation creation = (Creation) child;
+                funcContext.setAddress(creation.getDataType().getName(),
+                        new Pointer(new RegisterAccess("SP", size)));
+                size++;
+            }
         }
         
-        for (final AbstractSyntaxNode child : children)
+        for (int i = 0; i < args.length; i++)
         {
-            for (AbstractSyntaxNode node : child.getChildren())
+            Data address = null;
+            switch (i)
             {
-                if (node instanceof Creation)
-                {
-                    Creation creation = (Creation) node;
-                    for (String offsetName : funcContext.getOffsets().keySet())
-                    {
-                        funcContext.setOffset(offsetName,
-                                funcContext.getOffset(offsetName) + 1);
-                    }
-                    funcContext.setOffset(creation.getDataType().getName(), 0);
-                }
+                case 0:
+                    address = new RegisterAccess("A");
+                    break;
+                case 1:
+                    address = new RegisterAccess("B");
+                    break;
+                case 2:
+                    address = new RegisterAccess("C");
+                    break;
+                
+                default:
+                    address = new Pointer(new RegisterAccess("SP", size));
+                    size++;
+                    break;
             }
+            funcContext.setAddress(args[i].getName(), address);
         }
         
         return funcContext;

@@ -4,13 +4,14 @@ import java.util.Map;
 
 import com.google.common.collect.Maps;
 import com.kokakiwi.dev.tenc.core.builder.entities.Function;
+import com.kokakiwi.dev.tenc.core.generator.entities.Data;
 
 public class Context
 {
     private final String                name;
     private final Map<String, Function> functions = Maps.newLinkedHashMap();
     private final Map<String, Object>   values    = Maps.newLinkedHashMap();
-    private final Map<String, Integer>  offsets   = Maps.newLinkedHashMap();
+    private final Map<String, Data>     addresses = Maps.newLinkedHashMap();
     private final Map<String, Integer>  ids       = Maps.newLinkedHashMap();
     
     public Context(String name)
@@ -25,18 +26,18 @@ public class Context
     
     public Context(String name, Context parent)
     {
-        this(name, parent.getOffsets(), parent.getValues(), parent
+        this(name, parent.getAddresses(), parent.getValues(), parent
                 .getFunctions(), parent.getIds());
     }
     
-    public Context(String name, Map<String, Integer> offsets,
+    public Context(String name, Map<String, Data> addresses,
             Map<String, Object> values, Map<String, Function> functions,
             Map<String, Integer> ids)
     {
         this.name = name;
-        if (offsets != null)
+        if (addresses != null)
         {
-            this.offsets.putAll(offsets);
+            this.addresses.putAll(addresses);
         }
         
         if (values != null)
@@ -60,9 +61,9 @@ public class Context
         return name;
     }
     
-    public Map<String, Integer> getOffsets()
+    public Map<String, Data> getAddresses()
     {
-        return offsets;
+        return addresses;
     }
     
     public Map<String, Object> getValues()
@@ -80,14 +81,14 @@ public class Context
         return ids;
     }
     
-    public int getOffset(String name)
+    public Data getAddress(String name)
     {
-        return offsets.get(name);
+        return addresses.get(name);
     }
     
-    public void setOffset(String name, int value)
+    public void setAddress(String name, Data value)
     {
-        offsets.put(name, value);
+        addresses.put(name, value);
     }
     
     public Object getValue(String name)
@@ -138,7 +139,7 @@ public class Context
     {
         Context clone = new Context(name);
         
-        clone.getOffsets().putAll(offsets);
+        clone.getAddresses().putAll(addresses);
         clone.getFunctions().putAll(functions);
         clone.getValues().putAll(values);
         clone.getIds().putAll(ids);

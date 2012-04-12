@@ -17,6 +17,7 @@ public class Opcode
     public final static Opcode IFN = new Opcode("IFN");
     public final static Opcode IFG = new Opcode("IFG");
     public final static Opcode IFB = new Opcode("IFB");
+    public final static Opcode JSR = new Opcode("JSR");
     
     private final String       name;
     

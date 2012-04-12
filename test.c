@@ -1,18 +1,17 @@
 void main()
 {
-    char c;
-    int i = 35;
+    write('H');
+    write('e');
+    write('l');
+    write('l');
+    write('o');
+}
+
+void write(char c)
+{
+    int pointer = 0x8000 + [0x0100];
     
-    if(i == 35)
-    {
-        c = 'Y';
-    }
-    else if(i == 36)
-    {
-        c = 'E';
-    }
-    else
-    {
-        c = 'S';
-    }
+    [pointer] = c;
+    
+    [0x0100]++;
 }

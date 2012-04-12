@@ -80,7 +80,7 @@ public class Assignment extends AbstractSyntaxNode
         
         Data value = getValue(context, lines);
         
-        if (!context.getOffsets().containsKey(ident))
+        if (context.getAddress(ident) == null)
         {
             Context.error("Try to assign a non-existent variable: " + ident);
         }
@@ -89,21 +89,44 @@ public class Assignment extends AbstractSyntaxNode
         {
             lines.add(new Comment("Start assignment"));
         }
-        int offset = context.getOffset(ident);
         
-        if (offset != 0)
+        Data data = context.getAddress(ident);
+        
+        if (data instanceof RegisterAccess)
         {
-            lines.add(new Instruction(Opcode.SET, new RegisterAccess("I"),
-                    new RegisterAccess("SP")));
-            lines.add(new Instruction(Opcode.ADD, new RegisterAccess("I"),
-                    new Value(offset)));
-            generateOperationLines(lines, op, new Pointer(new RegisterAccess(
-                    "I")), value);
+            generateOperationLines(lines, op, data, value);
         }
-        else
+        else if (data instanceof Pointer)
         {
-            generateOperationLines(lines, op, new Pointer(new RegisterAccess(
-                    "SP")), value);
+            Data pointed = ((Pointer) data).getData();
+            if (pointed instanceof Value)
+            {
+                generateOperationLines(lines, op, data, value);
+            }
+            else if (pointed instanceof RegisterAccess)
+            {
+                RegisterAccess access = (RegisterAccess) pointed;
+                if (access.getRegisterName().equalsIgnoreCase("SP")
+                        && access.getOffset() != 0)
+                {
+                    lines.add(new Instruction(Opcode.SET)
+                            .first(Datas.data("I")).second(access));
+                    
+                    String opz = "+";
+                    if (access.getOffset() < 0)
+                    {
+                        opz = "";
+                    }
+                    
+                    generateOperationLines(lines, op,
+                            Datas.data("[I" + opz + access.getOffset() + "]"),
+                            value);
+                }
+                else
+                {
+                    generateOperationLines(lines, op, data, value);
+                }
+            }
         }
         
         return lines;
@@ -117,10 +140,11 @@ public class Assignment extends AbstractSyntaxNode
         }
         else
         {
+            Expression expr = (Expression) children.get(0);
+            
             Context exprContext = new Context(context);
             exprContext.setValue("__result", regToUse);
             
-            Expression expr = (Expression) children.get(0);
             lines.addAll(expr.generate(exprContext));
             
             return Datas.data(regToUse);

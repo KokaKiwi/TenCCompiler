@@ -65,22 +65,51 @@ public class Identifier extends Factor
         {
             lines.add(new Comment("Start identifier"));
         }
-        int offset = context.getOffset(name);
+        Data data = context.getAddress(name);
         
-        if (offset != 0)
+        if (data instanceof Value)
         {
-            lines.add(new Instruction(Opcode.SET)
-                    .first(new RegisterAccess("I")).second(
-                            new RegisterAccess("SP")));
-            lines.add(new Instruction(Opcode.ADD)
-                    .first(new RegisterAccess("I")).second(new Value(offset)));
             lines.add(new Instruction(new Opcode(op)).first(
-                    new RegisterAccess(reg)).second(Datas.data("[I]")));
+                    new RegisterAccess(reg)).second(data));
         }
-        else
+        else if (data instanceof RegisterAccess)
         {
             lines.add(new Instruction(new Opcode(op)).first(
-                    new RegisterAccess(reg)).second(Datas.data("[SP]")));
+                    new RegisterAccess(reg)).second(data));
+        }
+        else if (data instanceof Pointer)
+        {
+            Data value = ((Pointer) data).getData();
+            if (value instanceof Value)
+            {
+                lines.add(new Instruction(new Opcode(op)).first(
+                        new RegisterAccess(reg)).second(data));
+            }
+            else if (value instanceof RegisterAccess)
+            {
+                RegisterAccess access = (RegisterAccess) value;
+                if (access.getRegisterName().equalsIgnoreCase("SP")
+                        && access.getOffset() != 0)
+                {
+                    lines.add(new Instruction(Opcode.SET)
+                            .first(Datas.data("I")).second(access));
+                    
+                    String opz = "+";
+                    if (access.getOffset() < 0)
+                    {
+                        opz = "";
+                    }
+                    
+                    lines.add(new Instruction(new Opcode(op)).first(
+                            new RegisterAccess(reg)).second(
+                            Datas.data("[I" + opz + access.getOffset() + "]")));
+                }
+                else
+                {
+                    lines.add(new Instruction(new Opcode(op)).first(
+                            new RegisterAccess(reg)).second(data));
+                }
+            }
         }
         
         return lines;

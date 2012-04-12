@@ -49,13 +49,83 @@ public class FunctionCall extends Factor
         {
             lines.add(new Comment("Start function call"));
         }
+        
         Function function = context.getFunction(name);
         if (function == null)
         {
             Context.error("Tried to call non-existant function " + name);
         }
         
-        lines.add(new Instruction(Opcode.SET, new RegisterAccess("PUSH"),
+        if (function.getArgs().length != children.size())
+        {
+            Context.error("Tried to call function with not enought args "
+                    + name);
+        }
+        
+        // TODO Create a callee context
+        Context callContext = new Context(context);
+        int offset = 0;
+        
+        for (int i = 0; i < children.size(); i++)
+        {
+            String reg = regToUse;
+            switch (i)
+            {
+                case 0:
+                    reg = "A";
+                    break;
+                
+                case 1:
+                    reg = "B";
+                    break;
+                
+                case 2:
+                    reg = "C";
+                    break;
+                
+                default:
+                    lines.add(new Instruction(Opcode.SUB).first(
+                            new RegisterAccess("SP")).second(new Value(1)));
+                    reg = "[SP]";
+                    offset++;
+                    break;
+            }
+            
+            callContext.setValue("__result", reg);
+            lines.addAll(children.get(i).generate(callContext));
+        }
+        if (offset > 0)
+        {
+            lines.add(new Instruction(Opcode.ADD).first(
+                    new RegisterAccess("SP")).second(new Value(offset)));
+        }
+        lines.add(new Instruction(Opcode.JSR).first(new LabelCall(String
+                .format(Function.FUNCTION_MANGLE, name))));
+        
+        if (!function.getReturnType().getType().equalsIgnoreCase("void"))
+        {
+            String reg = regToUse;
+            if (context.getValue("__result") != null)
+            {
+                reg = (String) context.getValue("__result");
+            }
+            
+            String op = "SET";
+            if (context.getValue("__op") != null)
+            {
+                op = (String) context.getValue("__op");
+            }
+            
+            lines.add(new Instruction(new Opcode(op)).first(
+                    new RegisterAccess(reg)).second(new RegisterAccess("A")));
+        }
+        
+        return lines;
+    }
+    
+    //@formatter:off
+    /*
+     * lines.add(new Instruction(Opcode.SET, new RegisterAccess("PUSH"),
                 new Value(0)));
         lines.add(new Instruction(Opcode.SET, new RegisterAccess("I"),
                 new RegisterAccess("SP")));
@@ -70,13 +140,12 @@ public class FunctionCall extends Factor
         
         lines.add(new Instruction(Opcode.SET, new Pointer(new RegisterAccess(
                 "I")), new RegisterAccess("PC")));
-        lines.add(new Instruction(Opcode.SET, new Pointer(new RegisterAccess(
+        lines.add(new Instruction(Opcode.SUB, new Pointer(new RegisterAccess(
                 "I")), new Value(3)));
         lines.add(new Instruction(Opcode.SET, new RegisterAccess("PC"),
                 new LabelCall(String.format(Function.FUNCTION_MANGLE, name))));
-        
-        return lines;
-    }
+     */
+    //@formatter:on
     
     public static boolean accept(AbstractSyntaxNode node, TokenReader reader)
     {

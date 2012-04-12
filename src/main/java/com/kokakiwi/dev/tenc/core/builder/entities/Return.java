@@ -41,17 +41,19 @@ public class Return extends AbstractSyntaxNode
         {
             if (children.size() > 0)
             {
-                for (AbstractSyntaxNode child : children)
-                {
-                    lines.addAll(child.generate(context));
-                }
-                int offset = context.getOffset("__return");
+                Expression expr = (Expression) children.get(0);
                 
-                lines.add(new Instruction(Opcode.ADD).first(
-                        new RegisterAccess("SP")).second(new Value(offset)));
-                lines.add(new Instruction(Opcode.SET).first(
-                        new RegisterAccess("PC")).second(
-                        new RegisterAccess("POP")));
+                Context exprContext = new Context(context);
+                exprContext.setValue("__result", "A");
+                lines.addAll(expr.generate(exprContext));
+                
+                // int offset = context.getOffset("__return");
+                
+                // lines.add(new Instruction(Opcode.ADD).first(
+                // new RegisterAccess("SP")).second(new Value(offset)));
+                // lines.add(new Instruction(Opcode.SET).first(
+                // new RegisterAccess("PC")).second(
+                // new RegisterAccess("POP")));
             }
             else
             {
