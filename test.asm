@@ -5,15 +5,15 @@ SET PC, func_main
 SUB PC, 1
 :func_main
 SUB SP, 2
-SET X, 6
-ADD X, 3
-SET [SP], X
+SET 6, X
+ADD 3, X
+SET X, [SP]
 SET A, [SP]
-SET B, 35
+SET 35, B
 JSR func_test
 SET X, A
 SET I, SP
-SET [I+1], X
+SET X, [I+1]
 ADD SP, 2
 SET PC, exit
 :func_test
@@ -21,8 +21,8 @@ SUB SP, 1
 SET Y, A
 MUL Y, B
 SET X, Y
-ADD X, 6
-SET [SP], X
+ADD 6, X
+SET X, [SP]
 SET A, [SP]
 ADD SP, 1
 SET PC, POP
