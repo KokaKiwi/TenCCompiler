@@ -19,11 +19,8 @@ public class Instruction implements AssemblyLine
     public Instruction(Opcode opcode, Data first, Data second)
     {
         this.opcode = opcode;
-        // this.first = first;
-        // this.second = second;
-        // Spec 1.4
-        this.first = second;
-        this.second = first;
+        this.first = first;
+        this.second = second;
     }
     
     public Opcode getOpcode()
