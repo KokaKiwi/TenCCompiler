@@ -55,7 +55,7 @@ public class TenCCompiler
     {
         System.out.println("DCPU Emulator v" + VERSION.toString());
         System.out
-                .println("Usage: java -jar brainfuck-compiler.jar --in [INPUT FILE] --out [OUTPUT FILE]");
+                .println("Usage: java -jar tenc-compiler.jar --in [INPUT FILE] --out [OUTPUT FILE]");
     }
     
     private void run()
@@ -69,8 +69,6 @@ public class TenCCompiler
     
     public static void main(String[] args)
     {
-        // new BrainfuckLangageCompiler(args);
-        new TenCCompiler(new String[] { "--", "--nocomments", "--in", "test.c", "--out",
-                "test.asm" });
+        new TenCCompiler(args);
     }
 }
